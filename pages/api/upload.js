@@ -1,4 +1,15 @@
 export default async function handler(req, res) {
+
+  // === CORS: BotMaker necesita esto ===
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    // Responde rápido a las preflight requests de CORS
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST")
     return res.status(405).json({ error: "Método no permitido" });
 
@@ -32,10 +43,15 @@ export default async function handler(req, res) {
     console.log("📄 RESPONSE BODY:", text);
 
     if (!response.ok) {
-      return res.status(500).json({ error: "Error al subir PDF", details: text });
+      return res.status(500).json({
+        error: "Error al subir PDF",
+        details: text,
+        status: response.status,
+      });
     }
 
     const publicUrl = `https://yefqctzggxbbjrwmbiyf.supabase.co/storage/v1/object/public/pdfs/${fileName}`;
+    console.log("✅ PDF subido correctamente:", publicUrl);
     res.status(200).json({ url: publicUrl });
   } catch (err) {
     console.error("💥 Error general:", err);
