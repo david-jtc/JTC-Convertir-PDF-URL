@@ -10,6 +10,11 @@ export default async function handler(req, res) {
     const fileName = `${Date.now()}.pdf`;
     const buffer = Buffer.from(base64, "base64");
 
+    console.log("🟢 Iniciando subida a Supabase...");
+    console.log("📁 Nombre del archivo:", fileName);
+    console.log("🔑 Token presente:", !!process.env.SUPABASE_SERVICE_ROLE);
+    console.log("📦 URL destino:", `https://yefqctzggxbbjrwmbiyf.supabase.co/storage/v1/object/pdfs/${fileName}`);
+
     const response = await fetch(
       `https://yefqctzggxbbjrwmbiyf.supabase.co/storage/v1/object/pdfs/${fileName}`,
       {
@@ -21,18 +26,19 @@ export default async function handler(req, res) {
         body: buffer,
       }
     );
-    
-    console.log("STATUS:", response.status);
+
+    console.log("📡 STATUS:", response.status);
+    const text = await response.text();
+    console.log("📄 RESPONSE BODY:", text);
+
     if (!response.ok) {
-      const text = await response.text();
-      console.log("TEXT:", text);
-      return res.status(500).json({ error: "Error al subir PDF" });
+      return res.status(500).json({ error: "Error al subir PDF", details: text });
     }
 
     const publicUrl = `https://yefqctzggxbbjrwmbiyf.supabase.co/storage/v1/object/public/pdfs/${fileName}`;
     res.status(200).json({ url: publicUrl });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error interno" });
+    console.error("💥 Error general:", err);
+    res.status(500).json({ error: "Error interno", details: err.message });
   }
 }
