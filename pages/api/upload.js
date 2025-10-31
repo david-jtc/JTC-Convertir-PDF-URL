@@ -21,10 +21,11 @@ export default async function handler(req, res) {
         body: buffer,
       }
     );
-
+    
+    console.log("STATUS:", response.status);
     if (!response.ok) {
       const text = await response.text();
-      console.error(text);
+      console.log("TEXT:", text);
       return res.status(500).json({ error: "Error al subir PDF" });
     }
 
